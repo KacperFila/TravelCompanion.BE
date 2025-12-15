@@ -36,7 +36,7 @@ namespace TravelCompanion.Shared.Infrastructure;
 
 internal static class Extensions
 {
-    private const string AngularCorsPolicy = "AngularClientCORSPolicy";
+    private const string AngularClientCorsPolicy = "AngularClientCorsPolicy";
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services,
         IList<Assembly> assemblies, IList<IModule> modules)
@@ -60,16 +60,15 @@ internal static class Extensions
                 }
             }
 
-
             services.AddCors(cors =>
             {
-                var allowedOrigins = configuration
-                    .GetSection("AllowedCorsPolicy")
-                    .Get<string[]>();
-
-                cors.AddPolicy(AngularCorsPolicy, policy =>
+                var angularClientOrigin = configuration
+                    .GetSection("AngularClientUrl")
+                    .Get<string>();
+                
+                cors.AddPolicy(AngularClientCorsPolicy, policy =>
                 {
-                    policy.WithOrigins(allowedOrigins)
+                    policy.WithOrigins(angularClientOrigin)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
@@ -157,7 +156,7 @@ internal static class Extensions
 
     public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
     {
-        app.UseCors(AngularCorsPolicy);
+        app.UseCors(AngularClientCorsPolicy);
         app.UseErrorHandling();
         // app.UseBackgroundJobs();
         app.UseSwagger();
