@@ -1,4 +1,4 @@
-# docker-compose file for deploying postgres and pgadmin for local dev purposes
+# docker-compose file for deploying db and api locally
 
 services:
   travelcompanion-postgres:
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./API/scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       retries: 10
     networks:
@@ -41,9 +41,23 @@ services:
     networks:
       - travelcompanion-network
 
+  travelcompanion-api:
+    image: travelcompanion-api:latest
+    container_name: travelcompanion-api
+    restart: always
+    depends_on:
+      travelcompanion-postgres:
+        condition: service_healthy
+    environment:
+      postgres__connectionString:
+        Host=travelcompanion-postgres;Port=5432;Database=travelCompanion;Username=postgres;Password=postgres
+    ports:
+      - "5000:5000"
+    networks:
+      - travelcompanion-network
+
 volumes:
   postgres_data:
-
 
 networks:
   travelcompanion-network:
